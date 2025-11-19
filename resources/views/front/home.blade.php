@@ -112,6 +112,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .cart-icon:hover {
+            transform: scale(1.1);
+            color: #FFE4E9;
         }
 
         .cart-count {
@@ -288,6 +294,9 @@
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .product-card:hover {
@@ -301,6 +310,7 @@
             background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 100%);
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .product-image {
@@ -324,6 +334,9 @@
 
         .product-info {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .product-title {
@@ -331,8 +344,12 @@
             font-weight: 600;
             color: #6B4C4C;
             margin-bottom: 12px;
-            min-height: 45px;
+            height: 60px;
             line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 
         .product-rating {
@@ -381,6 +398,7 @@
             color: #333;
             margin-bottom: 15px;
             font-size: 1.1rem;
+            margin-top: auto;
         }
 
         .btn-checkout {
@@ -388,7 +406,7 @@
             background: var(--dark-pink);
             color: white;
             border: none;
-            padding: 8px;
+            padding: 10px;
             border-radius: 15px;
             font-size: 0.9rem;
             font-weight: 500;
@@ -404,6 +422,7 @@
         .card-buttons {
             display: flex;
             gap: 10px;
+            margin-top: 10px;
         }
 
         .btn-circle {
@@ -450,10 +469,10 @@
             </div>
 
             <div class="cart-section">
-                <div class="cart-icon">
+                <a href="{{ route('cart') }}" class="cart-icon" style="text-decoration: none; color: inherit;">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
-                </div>
+                    <span class="cart-count" id="cartBadge">0</span>
+                </a>
                 @auth
                     <a href="{{ route('logout') }}" 
                        class="btn-logout"
@@ -464,7 +483,7 @@
                         @csrf
                     </form>
                 @else
-                    <a href="{{ route('customer.login') }}" class="btn-logout">
+                    <a href="{{ route('login') }}" class="btn-logout">
                         Login
                     </a>
                 @endauth
@@ -474,20 +493,20 @@
 
     <!-- Category Navigation -->
     <nav class="category-nav">
-        <a href="#" class="category-link active">All Products</a>
-        <a href="#" class="category-link">Blush & Bronzer</a>
-        <a href="#" class="category-link">Lipstick & Lip Care</a>
-        <a href="#" class="category-link">Eyeshadow Palette</a>
-        <a href="#" class="category-link">Mascara & Eyeliner</a>
-        <a href="#" class="category-link">Foundation & Concealer</a>
-        <a href="#" class="category-link">Skincare Products</a>
-        <a href="#" class="category-link">Makeup Tools</a>
+        <a href="#" class="category-link active" onclick="filterCategory('all', event)">All Products</a>
+        <a href="#" class="category-link" onclick="filterCategory('blush', event)">Blush & Bronzer</a>
+        <a href="#" class="category-link" onclick="filterCategory('lipstick', event)">Lipstick & Lip Care</a>
+        <a href="#" class="category-link" onclick="filterCategory('eyeshadow', event)">Eyeshadow Palette</a>
+        <a href="#" class="category-link" onclick="filterCategory('mascara', event)">Mascara & Eyeliner</a>
+        <a href="#" class="category-link" onclick="filterCategory('foundation', event)">Foundation & Concealer</a>
+        <a href="#" class="category-link" onclick="filterCategory('skincare', event)">Skincare Products</a>
+        <a href="#" class="category-link" onclick="filterCategory('tools', event)">Makeup Tools</a>
     </nav>
 
     <!-- Products Grid -->
     <div class="products-grid">
         <!-- Product Card 1 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 1]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="lipstick" onclick="window.location.href='{{ route('product.detail', ['id' => 1]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk.jpg') }}" class="product-image" alt="2in1 Lipstick">
                 <span class="product-badge">New!</span>
@@ -519,13 +538,13 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 1]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 1]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 2 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 2]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="foundation" onclick="window.location.href='{{ route('product.detail', ['id' => 2]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk1.jpg') }}" class="product-image" alt="2in1 Cushion">
                 <span class="product-badge">New!</span>
@@ -556,13 +575,13 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 2]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 2]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 3 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 3]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="mascara" onclick="window.location.href='{{ route('product.detail', ['id' => 3]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk2.webp') }}" class="product-image" alt="Mascara">
                 <span class="product-badge">New!</span>
@@ -590,13 +609,13 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 3]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 3]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 4 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 4]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="blush" onclick="window.location.href='{{ route('product.detail', ['id' => 4]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk3.jpg') }}" class="product-image" alt="Blush">
             </div>
@@ -625,13 +644,13 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 4]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 4]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 5 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 5]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="eyeshadow" onclick="window.location.href='{{ route('product.detail', ['id' => 5]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk4.jpeg') }}" class="product-image" alt="Eyeshadow Palette">
             </div>
@@ -658,13 +677,13 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 5]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 5]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 6 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 6]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="tools" onclick="window.location.href='{{ route('product.detail', ['id' => 6]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk5.webp') }}" class="product-image" alt="Eyebrow Pencil">
             </div>
@@ -694,19 +713,29 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 6]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 6]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 7 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 7]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="lipstick" onclick="window.location.href='{{ route('product.detail', ['id' => 7]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk6.jpeg') }}" class="product-image" alt="Lip Gloss">
             </div>
             <div class="product-info">
                 <h3 class="product-title">MAKE OVER Intense Matte Lip Cream 
                     6.5 g </h3>
+                    <div class="product-rating">
+                    <span class="rating-number">4.8</span>
+                    <div class="stars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
                 <div class="product-colors">
                     <span class="color-dot" style="background: #FFB6C1"></span>
                     <span class="color-dot" style="background: #FF1493"></span>
@@ -720,19 +749,29 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 7]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 7]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
 
         <!-- Product Card 8 -->
-        <div class="product-card" onclick="window.location.href='{{ route('product.detail', ['id' => 8]) }}'" style="cursor: pointer;">
+        <div class="product-card" data-category="mascara" onclick="window.location.href='{{ route('product.detail', ['id' => 8]) }}'" style="cursor: pointer;">
             <div class="product-image-container">
                 <img src="{{ asset('assets/Images/produk7.jpg') }}" class="product-image" alt="Eyeliner">
                 <span class="product-badge">New!</span>
             </div>
             <div class="product-info">
                 <h3 class="product-title">PINKFLASH Waterproof Easy Eyeliner Pen | Eye Liner Hitam & Coklat | Pink Flash Smoodgeproof</h3>
+                <div class="product-rating">
+                    <span class="rating-number">4.8</span>
+                    <div class="stars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
                 <div class="product-colors">
                     <span class="color-dot" style="background: #000000"></span>
                     <span class="color-dot" style="background: #654321"></span>
@@ -745,7 +784,7 @@
                     <button class="btn-circle" onclick="event.stopPropagation();">
                         <i class="fas fa-shopping-bag"></i>
                     </button>
-                    <a href="{{ route('product.detail', ['id' => 8]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
+                    <a href="{{ route('checkout.product', ['id' => 8]) }}" class="btn-checkout" style="text-decoration: none; display: flex; align-items: center; justify-content: center;" onclick="event.stopPropagation();">Check Out</a>
                 </div>
             </div>
         </div>
@@ -755,6 +794,52 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function filterCategory(category, event) {
+            event.preventDefault();
+            
+            // Update active category link
+            document.querySelectorAll('.category-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Get all product cards
+            const productCards = document.querySelectorAll('.product-card');
+            
+            // Show/hide products based on category
+            productCards.forEach(card => {
+                if (category === 'all') {
+                    card.style.display = '';
+                } else {
+                    const productCategory = card.getAttribute('data-category');
+                    if (productCategory === category) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Check if no products found
+            const visibleProducts = Array.from(productCards).filter(card => card.style.display !== 'none').length;
+            const productsGrid = document.querySelector('.products-grid');
+            
+            // Remove existing "no results" message if any
+            const existingMessage = document.querySelector('.no-results-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // If no products visible, show message
+            if (visibleProducts === 0) {
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'no-results-message';
+                noResultsDiv.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 60px 20px; font-size: 1.2rem; color: #666;';
+                noResultsDiv.innerHTML = '<i class="fas fa-box-open" style="font-size: 3rem; color: #FFB6C1; margin-bottom: 20px; display: block;"></i>Belum ada produk dalam kategori ini';
+                productsGrid.appendChild(noResultsDiv);
+            }
+        }
+
         function searchProducts() {
             // Get search input value
             const searchValue = document.getElementById('searchInput').value.toLowerCase();
@@ -796,6 +881,34 @@
                 productsGrid.appendChild(noResultsDiv);
             }
         }
+
+        // Update cart badge on page load
+        function updateCartBadge() {
+            // Get cart items from our current cart page (3 items with quantities 1, 2, 1)
+            const defaultCartItems = [
+                { id: 1, quantity: 1 },
+                { id: 2, quantity: 2 },
+                { id: 3, quantity: 1 }
+            ];
+            
+            // Try to get from localStorage, if not exist use default
+            let cartItems = JSON.parse(localStorage.getItem('cartItems'));
+            if (!cartItems || cartItems.length === 0) {
+                cartItems = defaultCartItems;
+                localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            }
+            
+            let totalItems = 0;
+            cartItems.forEach(item => {
+                totalItems += item.quantity;
+            });
+            document.getElementById('cartBadge').textContent = totalItems;
+        }
+
+        // Initialize cart badge when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+        });
     </script>
 </body>
 </html>
