@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -13,7 +14,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth')->except('index','show');
+        $this->middleware('auth')->except('index', 'show');
     }
 
     /**
@@ -23,6 +24,29 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('front.home');
+        $products = Product::where('is_active', true)
+            ->latest()
+            ->take(12)
+            ->get();
+            
+        $featuredProducts = Product::where('is_active', true)
+            ->where('stock', '>', 0)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        return view('front.home', compact('products', 'featuredProducts'));
+    }
+
+    public function show($id)
+    {
+        $product = Product::where('is_active', true)->findOrFail($id);
+        $relatedProducts = Product::where('is_active', true)
+            ->where('category', $product->category)
+            ->where('id', '!=', $product->id)
+            ->take(4)
+            ->get();
+
+        return view('front.product-detail', compact('product', 'relatedProducts'));
     }
 }
